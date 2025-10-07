@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block title %}Manage System Announcements{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Manage System-Wide Announcements</h1>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Existing Announcements</div>
+            <div class="list-group list-group-flush">
+                {% for item in announcements %}
+                <div class="list-group-item d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="mb-1">{{ item.text }}</p>
+                        <small class="text-muted">{{ item.timestamp }}</small>
+                    </div>
+                    <form action="{{ url_for('manage_system_announcements') }}" method="post" class="ms-2">
+                        <input type="hidden" name="action" value="delete">
+                        <input type="hidden" name="announcement_id" value="{{ item.id }}">
+                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Are you sure?');">&times;</button>
+                    </form>
+                </div>
+                {% else %}
+                <div class="list-group-item">No system-wide announcements have been posted.</div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Create New Announcement</div>
+            <div class="card-body">
+                <form action="{{ url_for('manage_system_announcements') }}" method="post">
+                    <input type="hidden" name="action" value="create">
+                    <div class="mb-3">
+                        <label for="text" class="form-label">Announcement Text</label>
+                        <textarea name="text" id="text" class="form-control" rows="5" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

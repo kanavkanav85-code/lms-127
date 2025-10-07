@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Question Bank for {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Quiz & Question Bank: {{ subject.name }}</h1>
+    <a href="{{ url_for('manage_subject', subject_name=subject.name) }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Subject</a>
+</div>
+
+{% if not quiz %}
+<div class="alert alert-info">
+    You must create a quiz for this subject before you can add questions to it.
+    <form action="{{ url_for('create_quiz', subject_id=subject.id) }}" method="post" class="d-inline-flex ms-3">
+        <input type="text" name="title" class="form-control form-control-sm" value="{{ subject.name }} Quiz" required>
+        <button type="submit" class="btn btn-primary btn-sm ms-2">Create Quiz</button>
+    </form>
+</div>
+{% endif %}
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-bold">Question Bank (All questions for this subject)</div>
+            <ul class="list-group list-group-flush" style="max-height: 500px; overflow-y: auto;">
+                {% for q in bank_questions %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ loop.index }}. {{ q.text }}</span>
+                    {% if quiz %}
+                        {% if q.id in quiz_question_ids %}
+                        <form action="{{ url_for('remove_question_from_quiz', quiz_id=quiz.id, question_id=q.id) }}" method="post">
+                            <button type="submit" class="btn btn-warning btn-sm">Remove from Quiz</button>
+                        </form>
+                        {% else %}
+                        <form action="{{ url_for('add_question_to_quiz', quiz_id=quiz.id, question_id=q.id) }}" method="post">
+                             <button type="submit" class="btn btn-success btn-sm">Add to Quiz</button>
+                        </form>
+                        {% endif %}
+                    {% endif %}
+                </li>
+                {% else %}
+                <li class="list-group-item">The question bank is empty. Add a question using the form.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Add New Question to Bank</div>
+            <div class="card-body">
+                <div class="p-3 bg-light rounded mb-3">
+                    <h6><i class="bi bi-magic me-2"></i>AI Question Generator</h6>
+                    <textarea id="ai-topic" class="form-control form-control-sm" rows="2" placeholder="Enter topic to generate a question..."></textarea>
+                    <button id="generate-btn" class="btn btn-outline-primary btn-sm mt-2">Generate with AI</button>
+                </div>
+                <h6>Add Manually</h6>
+                <form id="add-question-form" action="{{ url_for('add_question_to_bank', subject_id=subject.id) }}" method="post">
+                    <input type="text" id="q-text" name="text" class="form-control mb-1" placeholder="Question Text" required>
+                    <input type="text" id="q-o1" name="o1" class="form-control form-control-sm mb-1" placeholder="Option 1" required>
+                    <input type="text" id="q-o2" name="o2" class="form-control form-control-sm mb-1" placeholder="Option 2" required>
+                    <input type="text" id="q-o3" name="o3" class="form-control form-control-sm mb-1" placeholder="Option 3" required>
+                    <input type="text" id="q-o4" name="o4" class="form-control form-control-sm mb-1" placeholder="Option 4" required>
+                    <input type="text" id="q-answer" name="answer" class="form-control form-control-sm" placeholder="Correct Answer (Exact Match)" required>
+                    <button type="submit" class="btn btn-secondary btn-sm mt-2">Add Question</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('generate-btn')?.addEventListener('click', async function() {
+    const topic = document.getElementById('ai-topic').value;
+    if (!topic) { alert('Please enter a topic.'); return; }
+    this.textContent = 'Generating...'; this.disabled = true;
+    const response = await fetch("{{ url_for('generate_ai_question') }}", {
+        method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ topic: topic })
+    });
+    if (response.ok) {
+        const data = await response.json();
+        document.getElementById('q-text').value = data.question;
+        document.getElementById('q-o1').value = data.options[0];
+        document.getElementById('q-o2').value = data.options[1];
+        document.getElementById('q-o3').value = data.options[2];
+        document.getElementById('q-o4').value = data.options[3];
+        document.getElementById('q-answer').value = data.answer;
+    } else {
+        alert('Failed to generate AI question. Check the terminal for more details.');
+    }
+    this.textContent = 'Generate with AI'; this.disabled = false;
+});
+</script>
+{% endblock %}

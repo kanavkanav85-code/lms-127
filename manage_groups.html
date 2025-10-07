@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Manage Groups{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Manage Groups for: {{ assignment.title }}</h1>
+    <a href="{{ url_for('manage_subject', subject_name=subject.name) }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Subject</a>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-bold">Existing Groups</div>
+            <div class="card-body">
+            {% for group in groups %}
+                <div class="mb-3 p-3 border rounded">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-0">{{ group.name }}</h5>
+                        <form action="{{ url_for('delete_group', group_id=group.id) }}" method="post">
+                            <button type="submit" class="btn btn-sm btn-danger">Delete Group</button>
+                        </form>
+                    </div>
+                    <hr>
+                    <ul class="list-unstyled">
+                    {% for member_id, member_name in members_by_group.get(group.id, []) %}
+                        <li>{{ member_name }}
+                            <form action="{{ url_for('remove_from_group', group_id=group.id, student_id=member_id) }}" method="post" class="d-inline">
+                                <button class="btn btn-link btn-sm text-danger">&times;</button>
+                            </form>
+                        </li>
+                    {% else %}
+                        <li>No members yet.</li>
+                    {% endfor %}
+                    </ul>
+                    <form action="{{ url_for('add_to_group', group_id=group.id) }}" method="post" class="mt-2">
+                        <div class="input-group">
+                            <select name="student_id" class="form-select">
+                                <option value="">Add student to group...</option>
+                                {% for student in unassigned_students %}
+                                <option value="{{ student.id }}">{{ student.display_name }}</option>
+                                {% endfor %}
+                            </select>
+                            <button class="btn btn-outline-secondary" type="submit">Add</button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                <p>No groups created yet.</p>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Create New Group</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('create_group', assignment_id=assignment.id) }}">
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Group Name</label>
+                        <input type="text" name="name" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Create Group</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

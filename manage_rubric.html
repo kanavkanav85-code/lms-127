@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Manage Rubric{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Manage Rubric for: {{ assignment.title }}</h1>
+    <a href="{{ url_for('manage_subject', subject_name=subject.name) }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Subject</a>
+</div>
+
+<div class="row">
+    <div class="col-md-7">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Current Criteria (Total Points: {{ total_points }})</div>
+            <ul class="list-group list-group-flush">
+                {% for criterion in criteria %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    {{ criterion.description }}
+                    <div>
+                        <span class="badge bg-primary rounded-pill me-3">{{ criterion.max_points }} pts</span>
+                        <form action="{{ url_for('delete_criterion', criterion_id=criterion.id) }}" method="post" class="d-inline">
+                            <button type="submit" class="btn btn-sm btn-outline-danger">&times;</button>
+                        </form>
+                    </div>
+                </li>
+                {% else %}
+                <li class="list-group-item">No criteria defined yet.</li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    <div class="col-md-5">
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold">Add New Criterion</div>
+            <div class="card-body">
+                <form method="post" action="{{ url_for('manage_rubric', assignment_id=assignment.id) }}">
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <input type="text" name="description" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="max_points" class="form-label">Max Points</label>
+                        <input type="number" name="max_points" class="form-control" min="1" required>
+                    </div>
+                    <button type="submit" class="btn btn-success">Add Criterion</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Forum for {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Discussion Forum: {{ subject.name }}</h1>
+    <a href="{{ url_for('course_detail', subject_name=subject.name) }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Course</a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-bold">Start a New Discussion</div>
+    <div class="card-body">
+        <form action="{{ url_for('post_to_forum', forum_id=forum.id) }}" method="post">
+            <div class="mb-3">
+                <textarea name="content" class="form-control" rows="4" placeholder="Type your question or comment here..." required></textarea>
+            </div>
+            <button type="submit" class="btn btn-primary">Post</button>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">Discussions</div>
+    <div class="list-group list-group-flush">
+        {% for post in posts %}
+        <div class="list-group-item">
+            <p>{{ post.content }}</p>
+            <small class="text-muted">Posted by <strong>{{ post.display_name }}</strong> on {{ post.timestamp }}</small>
+        </div>
+        {% else %}
+        <div class="list-group-item text-center">
+            No discussions yet. Be the first to start one!
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

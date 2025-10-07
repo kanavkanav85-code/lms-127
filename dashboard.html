@@ -1,0 +1,70 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+    <h1 class="h2">Dashboard</h1>
+</div>
+
+{% if system_announcements %}
+<div class="alert alert-warning shadow-sm">
+    <h4 class="alert-heading"><i class="bi bi-megaphone-fill me-2"></i>System Announcements</h4>
+    {% for announcement in system_announcements %}
+        <p class="mb-1">{{ announcement.text }}</p>
+        <small class="text-muted">Posted on: {{ announcement.timestamp }}</small>
+        <hr>
+    {% endfor %}
+</div>
+{% endif %}
+{% if session.role == 'admin' %}
+<div class="card mb-4 shadow-sm">
+    <div class="card-header fw-bold">Create New Subject</div>
+    <div class="card-body">
+        <form action="{{ url_for('create_subject') }}" method="post" class="row g-3">
+            <div class="col-auto flex-grow-1">
+                <input type="text" class="form-control" name="subject_name" placeholder="Enter New Subject Name" required>
+            </div>
+            <div class="col-auto">
+                <button type="submit" class="btn btn-primary"><i class="bi bi-plus-circle me-2"></i>Create Subject</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<h3 class="h4">My Subjects</h3>
+<div class="row">
+    {% for subject in subjects %}
+    <div class="col-lg-4 col-md-6 mb-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">{{ subject.name }}</h5>
+                
+                {% if session.role == 'student' %}
+                <div class="progress mb-2" style="height: 10px;">
+                    <div class="progress-bar" role="progressbar" style="width: {{ progress_data.get(subject.id, 0) }}%;" aria-valuenow="{{ progress_data.get(subject.id, 0) }}" aria-valuemin="0" aria-valuemax="100"></div>
+                </div>
+                <p class="card-text text-muted mb-auto">{{ progress_data.get(subject.id, 0) }}% Complete</p>
+                <a href="{{ url_for('course_detail', subject_name=subject.name) }}" class="btn btn-primary mt-3">Go to Subject <i class="bi bi-arrow-right-circle ms-2"></i></a>
+                {% elif session.role in ['admin', 'teacher'] %}
+                <p class="card-text text-muted mb-auto">Manage this subject's content, users, and analytics.</p>
+                <a href="{{ url_for('manage_subject', subject_name=subject.name) }}" class="btn btn-warning mt-3">Manage Subject <i class="bi bi-gear-fill ms-2"></i></a>
+                {% endif %}
+
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="col-12">
+        <div class="alert alert-info">
+            No subjects are available yet. 
+            {% if session.role == 'admin' %}
+                You can create one using the form above.
+            {% else %}
+                An admin must assign or enroll you in a subject before it will appear here.
+            {% endif %}
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

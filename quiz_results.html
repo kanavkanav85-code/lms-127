@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% block title %}Quiz Results for {{ quiz.title }}{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Results for: {{ quiz.title }}</h1>
+<a href="{{ url_for('manage_subject', subject_name=quiz.subject_name) }}" class="btn btn-secondary btn-sm mb-4"><i class="bi bi-arrow-left me-2"></i>Back to Subject</a>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">
+        Student Attempts
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Student</th>
+                        <th>Score</th>
+                        <th>Proctoring Flags</th>
+                        <th>Timestamp</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for attempt in attempts %}
+                    <tr>
+                        <td>{{ attempt.display_name }} ({{ attempt.student_id }})</td>
+                        <td>{{ attempt.score }} / {{ attempt.total }}</td>
+                        <td>
+                            {% set flags = proctoring_flags.get(attempt.student_id) %}
+                            {% if flags and flags.count > 0 %}
+                                <span class="badge bg-danger" role="button" data-bs-toggle="modal" data-bs-target="#logModal-{{ loop.index }}">
+                                    {{ flags.count }} Flag(s)
+                                </span>
+
+                                <div class="modal fade" id="logModal-{{ loop.index }}" tabindex="-1">
+                                  <div class="modal-dialog">
+                                    <div class="modal-content">
+                                      <div class="modal-header">
+                                        <h5 class="modal-title">Proctoring Log for {{ attempt.display_name }}</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                      </div>
+                                      <div class="modal-body">
+                                        <ul class="list-group">
+                                            {% for log_entry in flags.logs %}
+                                                <li class="list-group-item">{{ log_entry }}</li>
+                                            {% endfor %}
+                                        </ul>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </div>
+                            {% else %}
+                                <span class="badge bg-success">0 Flags</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ attempt.timestamp }}</td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center">No students have attempted this quiz yet.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

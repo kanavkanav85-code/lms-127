@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+{% block title %}My Performance{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">My Performance</h1>
+<div class="card shadow-sm mb-4">
+    <div class="card-header fw-bold">Quiz Results</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead><tr><th>Quiz Title</th><th>Score</th></tr></thead>
+                <tbody>
+                    {% for attempt in quiz_attempts %}
+                    <tr>
+                        <td>{{ attempt.title }}</td>
+                        <td>{{ attempt.score }} / {{ attempt.total }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="2">You have not attempted any quizzes yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">Assignment Grades</div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead><tr><th>Assignment</th><th>Grade</th><th>Feedback</th></tr></thead>
+                <tbody>
+                    {% for assignment in graded_assignments %}
+                    <tr>
+                        <td>{{ assignment.title }}</td>
+                        <td>{{ assignment.grade }}</td>
+                        <td>{{ assignment.feedback }}</td>
+                    </tr>
+                    {% else %}
+                    <tr><td colspan="3">No assignments have been graded yet.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

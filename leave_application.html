@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+{% block title %}Leave Application{% endblock %}
+{% block content %}
+<h1 class="h2 mb-4">Apply for Leave</h1>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <form action="{{ url_for('leave_application') }}" method="post" enctype="multipart/form-data">
+            <div class="mb-3">
+                <label for="reason" class="form-label">Reason for Leave</label>
+                <textarea name="reason" id="reason" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="row">
+                <div class="col-md-6 mb-3"><label for="start_date" class="form-label">Start Date</label><input type="date" name="start_date" id="start_date" class="form-control" required></div>
+                <div class="col-md-6 mb-3"><label for="end_date" class="form-label">End Date</label><input type="date" name="end_date" id="end_date" class="form-control" required></div>
+            </div>
+            <div class="mb-3">
+                <label for="document" class="form-label">Supporting Document (Optional)</label>
+                <input type="file" name="document" id="document" class="form-control">
+            </div>
+            <button type="submit" class="btn btn-primary">Submit Application</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

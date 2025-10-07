@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}Student Performance{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Student Performance Analytics</h1>
+<div class="row">
+    <div class="col-md-4">
+        <div class="card text-center text-white bg-primary mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title display-6">{{ total_students }}</h5>
+                <p class="card-text">Total Students</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center text-white bg-success mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title display-6">{{ total_subjects }}</h5>
+                <p class="card-text">Total Subjects</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card text-center text-white bg-info mb-3 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title display-6">{{ total_submissions }}</h5>
+                <p class="card-text">Total Submissions</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="card-header fw-bold">
+        Submissions per Subject
+    </div>
+    <div class="card-body">
+        <canvas id="engagementChart"></canvas>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('engagementChart');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: {{ labels|safe }},
+            datasets: [{
+                label: '# of Submissions',
+                data: {{ data|safe }},
+                backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        stepSize: 1
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                }
+            }
+        }
+    });
+</script>
+{% endblock %}

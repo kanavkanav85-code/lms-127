@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% block title %}Manage {{ subject.name }}{% endblock %}
+
+{% block content %}
+<h1 class="h2 mb-4">Manage: {{ subject.name }}</h1>
+<a href="{{ url_for('dashboard') }}" class="btn btn-secondary btn-sm mb-4"><i class="bi bi-arrow-left me-2"></i>Back to Dashboard</a>
+
+<div class="row">
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-bold"><i class="bi bi-folder-fill me-2"></i>Course Materials</div>
+            <div class="card-body">
+                <nav>
+                  <div class="nav nav-tabs mb-3" id="nav-tab" role="tablist">
+                    <button class="nav-link active" id="nav-upload-tab" data-bs-toggle="tab" data-bs-target="#nav-upload" type="button" role="tab">Upload File</button>
+                    <button class="nav-link" id="nav-link-tab" data-bs-toggle="tab" data-bs-target="#nav-link" type="button" role="tab">Add Link</button>
+                  </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                  <div class="tab-pane fade show active" id="nav-upload" role="tabpanel">
+                    <form action="{{ url_for('manage_subject', subject_name=subject.name) }}" method="post" enctype="multipart/form-data">
+                        <div class="input-group">
+                            <input type="file" class="form-control" name="file" required>
+                            <button class="btn btn-primary" type="submit">Upload</button>
+                        </div>
+                    </form>
+                  </div>
+                  <div class="tab-pane fade" id="nav-link" role="tabpanel">
+                    <form action="{{ url_for('manage_subject', subject_name=subject.name) }}" method="post">
+                        <input type="text" name="link_title" class="form-control mb-2" placeholder="Link Title" required>
+                        <input type="url" name="link_url" class="form-control mb-2" placeholder="https://example.com" required>
+                        <button class="btn btn-primary" type="submit">Add Link</button>
+                    </form>
+                  </div>
+                </div>
+                <hr>
+                <h6>Existing Materials</h6>
+                <ul class="list-group">
+                    {% for material in materials %}
+                    <li class="list-group-item"><i class="bi bi-{{ 'file-earmark' if material.type == 'file' else 'link-45deg' }} me-2"></i>{{ material.filename }}</li>
+                    {% else %}
+                    <li class="list-group-item">No materials added yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-bold"><i class="bi bi-patch-question-fill me-2"></i>Quiz Management</div>
+            <div class="card-body">
+                {% if not quiz %}
+                    <form action="{{ url_for('create_quiz', subject_id=subject.id) }}" method="post">
+                        <label class="form-label">Quiz Title</label>
+                        <input type="text" name="title" class="form-control mb-2" value="{{ subject.name }} Quiz" required>
+                        <button type="submit" class="btn btn-primary">Create Quiz</button>
+                    </form>
+                {% else %}
+                    <h6>{{ quiz.title }}</h6>
+                    <ul class="list-group list-group-flush mb-3">
+                        {% for q in questions %}
+                        <li class="list-group-item">{{ loop.index }}. {{ q.text }}</li>
+                        {% else %}
+                        <li class="list-group-item">No questions yet.</li>
+                        {% endfor %}
+                    </ul>
+                    <div class="p-3 bg-light rounded mb-3">
+                        <h6><i class="bi bi-magic me-2"></i>AI Question Generator</h6>
+                        <textarea id="ai-topic" class="form-control form-control-sm" rows="2" placeholder="Enter topic to generate a question, e.g., 'Python variables'"></textarea>
+                        <button id="generate-btn" class="btn btn-outline-primary btn-sm mt-2">Generate with AI</button>
+                    </div>
+                    <h6>Add New Question</h6>
+                    <form id="add-question-form" action="{{ url_for('add_question', quiz_id=quiz.id) }}" method="post">
+                        <input type="text" id="q-text" name="text" class="form-control mb-1" placeholder="Question Text" required>
+                        <input type="text" id="q-o1" name="o1" class="form-control form-control-sm mb-1" placeholder="Option 1" required>
+                        <input type="text" id="q-o2" name="o2" class="form-control form-control-sm mb-1" placeholder="Option 2" required>
+                        <input type="text" id="q-o3" name="o3" class="form-control form-control-sm mb-1" placeholder="Option 3" required>
+                        <input type="text" id="q-o4" name="o4" class="form-control form-control-sm mb-1" placeholder="Option 4" required>
+                        <input type="text" id="q-answer" name="answer" class="form-control form-control-sm" placeholder="Correct Answer (Exact Match)" required>
+                        <button type="submit" class="btn btn-secondary btn-sm mt-2">Add Question Manually</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm h-100">
+            <div class="card-header fw-bold"><i class="bi bi-file-earmark-text-fill me-2"></i>Assignment</div>
+            <div class="card-body">
+                 <form action="{{ url_for('create_assignment', subject_id=subject.id) }}" method="post">
+                    <div class="mb-3">
+                        <label class="form-label">Assignment Title</label>
+                        <input type="text" name="title" class="form-control" placeholder="e.g., Chapter 1 Essay" value="{{ assignment.title if assignment }}" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Instructions</label>
+                        <textarea name="instructions" class="form-control" rows="3" required>{{ assignment.instructions if assignment }}</textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Assignment</button>
+                </form>
+                {% if assignment %}
+                <hr>
+                <a href="{{ url_for('view_submissions', assignment_id=assignment.id) }}" class="btn btn-info">View Student Submissions</a>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6 mb-4">
+        <div class="card shadow-sm mb-4">
+            <div class="card-header fw-bold"><i class="bi bi-megaphone-fill me-2"></i>Announcements</div>
+            <div class="card-body">
+                <form action="{{ url_for('manage_subject', subject_name=subject.name) }}" method="post">
+                    <textarea name="announcement_text" class="form-control mb-2" placeholder="Post an update for all students" required></textarea>
+                    <button type="submit" class="btn btn-primary">Post Announcement</button>
+                </form>
+                <hr>
+                <h6>Past Announcements</h6>
+                <ul class="list-group" style="max-height: 150px; overflow-y: auto;">
+                    {% for item in announcements %}
+                    <li class="list-group-item">{{ item.text }} <br><small class="text-muted">{{ item.timestamp }}</small></li>
+                    {% else %}
+                    <li class="list-group-item">No announcements yet.</li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="card shadow-sm">
+            <div class="card-header fw-bold"><i class="bi bi-camera-video-fill me-2"></i>Virtual Meeting</div>
+            <div class="card-body">
+                <form action="{{ url_for('schedule_meeting', subject_id=subject.id) }}" method="post">
+                    <select name="platform" class="form-select mb-2" required>
+                        <option value="Google Meet">Google Meet</option>
+                        <option value="Zoom">Zoom</option>
+                        <option value="Microsoft Teams">Microsoft Teams</option>
+                    </select>
+                    <input type="text" name="topic" class="form-control mb-2" placeholder="Meeting Topic" required>
+                    <input type="url" name="url" class="form-control mb-2" placeholder="https://meet.google.com/..." required>
+                    <input type="datetime-local" name="meeting_time" class="form-control mb-2" required>
+                    <button type="submit" class="btn btn-info">Schedule Meeting</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.getElementById('generate-btn')?.addEventListener('click', async function() {
+    const topic = document.getElementById('ai-topic').value;
+    if (!topic) { alert('Please enter a topic.'); return; }
+    
+    this.textContent = 'Generating...';
+    this.disabled = true;
+
+    const response = await fetch("{{ url_for('generate_ai_question') }}", {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ topic: topic })
+    });
+    
+    if (response.ok) {
+        const data = await response.json();
+        document.getElementById('q-text').value = data.question;
+        document.getElementById('q-o1').value = data.options[0];
+        document.getElementById('q-o2').value = data.options[1];
+        document.getElementById('q-o3').value = data.options[2];
+        document.getElementById('q-o4').value = data.options[3];
+        document.getElementById('q-answer').value = data.answer;
+    } else {
+        alert('Failed to generate AI question.');
+    }
+
+    this.textContent = 'Generate with AI';
+    this.disabled = false;
+});
+</script>
+{% endblock %}

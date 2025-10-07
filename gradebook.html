@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block title %}Gradebook for {{ subject.name }}{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h1 class="h2 mb-0">Gradebook: {{ subject.name }}</h1>
+    <a href="{{ url_for('manage_subject', subject_name=subject.name) }}" class="btn btn-secondary"><i class="bi bi-arrow-left me-2"></i>Back to Management</a>
+</div>
+<div class="card shadow-sm">
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Student Name</th>
+                        {% for item in graded_items %}
+                            <th class="text-center">{{ item.title }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for student_id, data in grade_data.items() %}
+                    <tr>
+                        <td>{{ data.student_name }}</td>
+                        {% for item in graded_items %}
+                            <td class="text-center">{{ data.grades.get(item.id, 'N/A') }}</td>
+                        {% endfor %}
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ graded_items|length + 1 }}" class="text-center">No students enrolled.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
